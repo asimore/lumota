@@ -1,1 +1,1 @@
-hotwordv6.tflite
+hotword-0.0.1.tflite
