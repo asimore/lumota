@@ -19,6 +19,7 @@ sys.path.append('/home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/s
 
 from libnyumaya import AudioRecognition,FeatureExtractor
 from auto_platform import AudiostreamSource, play_command,default_libpath
+from pixels import Pixels
 
 REMOTE_SERVER = "www.google.com"
 MQTT_BROKER = "ec2-52-37-146-89.us-west-2.compute.amazonaws.com"
@@ -295,6 +296,9 @@ def confirmation():
 
 def main(ARGS):
 
+    pixels = Pixels()
+    pixels.wakeup()
+
     model = getModel(ARGS)
 
     # Start audio with VAD
@@ -318,11 +322,13 @@ def main(ARGS):
     for frame in frames:
         if frame is not None:
             if spinner: spinner.start()
+            pixels.listen()
             logging.debug("streaming frame")
             stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
             if ARGS.savewav: wav_data.extend(frame)
         else:
             if spinner: spinner.stop()
+            pixels.think()
             logging.debug("end utterence")
             if ARGS.savewav:
                 vad_audio.write_wav(os.path.join(ARGS.savewav, datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data)
@@ -333,8 +339,9 @@ def main(ARGS):
                 for s in phrases[p]:
                     if s.upper() in text.upper():
                         if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
-                            t=threading.Timer(8,confirmation)
+                            t=threading.Timer(5.5,confirmation)
                             t.start()
+                            pixels.speak()
                             os.system(confirmation_message.format(p))
                             is_confirmed = True
                             hotword = p
@@ -343,6 +350,7 @@ def main(ARGS):
                             # send message
                             is_confirmed = False
                             t.join()
+                            pixels.listen()
                             if(check_internet(REMOTE_SERVER) == True):
                                 print ("Recognized, {}".format(p))
                                 now = datetime.datetime.now().isoformat()
@@ -358,6 +366,7 @@ def main(ARGS):
                            print ("Recognized, {}".format(p))
                            is_confirmed = False
                            t.join()
+                           pixels.listen()
                         else:
                            print ("Recognized, {}".format(p))
 
