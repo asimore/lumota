@@ -285,6 +285,14 @@ def getModel(ARGS):
 
     return model
 
+is_confirmed = False
+def confirmation():
+    global is_confirmed
+
+    is_confirmed = False
+
+    print ('stopping confirmation wait {}: '.format(is_confirmed))
+
 def main(ARGS):
 
     model = getModel(ARGS)
@@ -303,6 +311,7 @@ def main(ARGS):
         spinner = Halo(spinner='line')
     stream_context = model.createStream()
     wav_data = bytearray()
+    global is_confirmed
     is_confirmed = False
     hotword = ""
     start = time.time()
@@ -319,19 +328,21 @@ def main(ARGS):
                 vad_audio.write_wav(os.path.join(ARGS.savewav, datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data)
                 wav_data = bytearray()
             text = stream_context.finishStream()
-#            print (text)
+            print ('Current recognition status {}: '.format(is_confirmed))
             for p in phrases:
                 for s in phrases[p]:
                     if s.upper() in text.upper():
                         if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
+                            t=threading.Timer(8,confirmation)
+                            t.start()
                             os.system(confirmation_message.format(p))
                             is_confirmed = True
                             hotword = p
                             start = time.time()
-                        elif is_confirmed and (p.upper() == 'YES') and ((time.time() - start) < 4):
+                        elif is_confirmed and (p.upper() == 'YES'):
                             # send message
-                            start = 0
                             is_confirmed = False
+                            t.join()
                             if(check_internet(REMOTE_SERVER) == True):
                                 print ("Recognized, {}".format(p))
                                 now = datetime.datetime.now().isoformat()
@@ -343,30 +354,13 @@ def main(ARGS):
                                 os.system("espeak --stdout 'No internet connection' | aplay")
                                 print("No internet connection, MQTT trigger not sent")
                                 logger.error("No internet connection, MQTT trigger not sent")
-                        elif (p.upper() == 'NO'):
+                        elif is_confirmed and (p.upper() == 'NO'):
                            print ("Recognized, {}".format(p))
                            is_confirmed = False
+                           t.join()
                         else:
-                           if ((time.time() - start) > 4):
-                                is_confirmed = False
+                           print ("Recognized, {}".format(p))
 
-
-                    #else:
-                        #print ("...")
-
-                    #try:
-                        #text.upper().index(s.upper())
-                    #except ValueError:
-                        #continue
-                        #print ("Unrecognized!")
-                    #else:
-                        #print ("Recognized, {}".format(p))
-                        #break
-
-            #if (text == 'fire' or text == 'nfire' or text == 'infire' or text == 'intruder' or text == 'help' or 'yes' or 'no' or ):
-                    #print("Recognized: %s" % text)
-            #else:
-                    #print ('Unrecognized phrase..')
             stream_context = model.createStream()
 
 if __name__ == '__main__':
