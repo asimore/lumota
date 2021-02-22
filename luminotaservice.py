@@ -18,7 +18,7 @@ if __name__ == '__main__':
            print ('no updates found.')
         else:
            os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/luminota.sh ' + model_name)
-           os.system('service luminled stop')
+           os.system('/usr/sbin/service luminled stop')
            os.system('cp ./LED_control.py /home/pi/projects/lumin/Lumin_FW_Src')
-           os.system('service luminled start')
+           os.system('/usr/sbin/service luminled start')
 exit(0)
