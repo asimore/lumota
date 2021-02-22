@@ -290,6 +290,7 @@ def getModel(ARGS):
 
 is_confirmed = False
 pixels = Pixels()
+pixels.off()
 
 def confirmation():
     global is_confirmed
