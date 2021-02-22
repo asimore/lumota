@@ -11,7 +11,7 @@ def check_version():
 
 if __name__ == '__main__':
 
-	#os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumingit.sh')
+        os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumingit.sh')
         model_name = check_version()
         print (model_name)
         if model_name.upper().strip() == 'NO_UPDATES':
