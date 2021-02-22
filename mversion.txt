@@ -1,1 +1,1 @@
-NO_UPDATES
+hotword-0.0.1.tflite
