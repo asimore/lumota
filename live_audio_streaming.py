@@ -16,6 +16,8 @@ import json
 import socket
 
 sys.path.append('/home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/src')
+sys.path.append('/home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumota')
+
 
 from libnyumaya import AudioRecognition,FeatureExtractor
 from auto_platform import AudiostreamSource, play_command,default_libpath
@@ -287,17 +289,18 @@ def getModel(ARGS):
     return model
 
 is_confirmed = False
+pixels = Pixels()
+
 def confirmation():
     global is_confirmed
 
     is_confirmed = False
-
+    pixels.on()
     print ('stopping confirmation wait {}: '.format(is_confirmed))
 
 def main(ARGS):
 
-    pixels = Pixels()
-    pixels.wakeup()
+    pixels.on()
 
     model = getModel(ARGS)
 
@@ -322,13 +325,13 @@ def main(ARGS):
     for frame in frames:
         if frame is not None:
             if spinner: spinner.start()
-            pixels.listen()
+            #pixels.on()
             logging.debug("streaming frame")
             stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
             if ARGS.savewav: wav_data.extend(frame)
         else:
             if spinner: spinner.stop()
-            pixels.think()
+            #pixels.on()
             logging.debug("end utterence")
             if ARGS.savewav:
                 vad_audio.write_wav(os.path.join(ARGS.savewav, datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data)
@@ -341,7 +344,7 @@ def main(ARGS):
                         if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
                             t=threading.Timer(5.5,confirmation)
                             t.start()
-                            pixels.speak()
+                            pixels.detected()
                             os.system(confirmation_message.format(p))
                             is_confirmed = True
                             hotword = p
@@ -350,7 +353,8 @@ def main(ARGS):
                             # send message
                             is_confirmed = False
                             t.join()
-                            pixels.listen()
+                            pixels.confirmed()
+                            time.sleep(1)
                             if(check_internet(REMOTE_SERVER) == True):
                                 print ("Recognized, {}".format(p))
                                 now = datetime.datetime.now().isoformat()
@@ -358,17 +362,22 @@ def main(ARGS):
                                 send_mqtt_trigger(now,hotword,is_confirmed)
                                 os.system("espeak --stdout 'Trigger sent' | aplay -Dsysdefault")
                                 is_confirmed = False
+                                pixels.on()
                             else:
                                 os.system("espeak --stdout 'No internet connection' | aplay")
                                 print("No internet connection, MQTT trigger not sent")
                                 logger.error("No internet connection, MQTT trigger not sent")
+                                pixels.ota()
                         elif is_confirmed and (p.upper() == 'NO'):
                            print ("Recognized, {}".format(p))
                            is_confirmed = False
                            t.join()
-                           pixels.listen()
+                           pixels.confirmed()
+                           time.sleep(1)
+                           pixels.on()
                         else:
                            print ("Recognized, {}".format(p))
+                           pixels.on()
 
             stream_context = model.createStream()
 
