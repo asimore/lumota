@@ -1,6 +1,9 @@
 import os
 import sys
 
+sys.path.append('/home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumota')
+from pixels import Pixels
+
 def check_version():
     fd = os.open('/home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumota/mversion.txt', os.O_RDONLY)
     readBytes = os.read(fd, 50)
@@ -10,6 +13,11 @@ def check_version():
     return readBytes.decode('utf-8')
 
 if __name__ == '__main__':
+
+        pixels = Pixels()
+        pixels.ota()
+
+        os.system("espeak --stdout 'Updating, please wait.' | aplay -Dsysdefault")
 
         os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumingit.sh')
         model_name = check_version()
@@ -21,4 +29,6 @@ if __name__ == '__main__':
            os.system('/usr/sbin/service luminled stop')
            os.system('cp ./LED_control.py /home/pi/projects/lumin/Lumin_FW_Src')
            os.system('/usr/sbin/service luminled start')
+
+        os.system("espeak --stdout 'Update completed.' | aplay -Dsysdefault")
 exit(0)
