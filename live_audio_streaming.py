@@ -378,7 +378,7 @@ def main(ARGS):
                            pixels.on()
                         else:
                            print ("Recognized, {}".format(p))
-                           pixels.on()
+                           #pixels.on()
 
             stream_context = model.createStream()
 
