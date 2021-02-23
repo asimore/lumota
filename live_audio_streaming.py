@@ -355,7 +355,7 @@ def main(ARGS):
                             is_confirmed = False
                             t.join()
                             pixels.confirmed()
-                            time.sleep(1)
+ #                           time.sleep(1)
                             if(check_internet(REMOTE_SERVER) == True):
                                 print ("Recognized, {}".format(p))
                                 now = datetime.datetime.now().isoformat()
@@ -374,7 +374,7 @@ def main(ARGS):
                            is_confirmed = False
                            t.join()
                            pixels.confirmed()
-                           time.sleep(1)
+#                           time.sleep(1)
                            pixels.on()
                         else:
                            print ("Recognized, {}".format(p))
