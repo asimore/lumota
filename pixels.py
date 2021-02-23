@@ -155,11 +155,11 @@ class Pixels:
 
     def _ota(self):
 
-        
-        self.write(self.ota_colors)
-        time.sleep(0.01)
-        self.off()
-        time.sleep(0.01)
+        self.next.clear()
+        while not self.next.is_set():
+            self.write(self.ota_colors)
+            time.sleep(0.1)
+            self.off()
 
         self.colors = self.ota_colors
 
@@ -177,11 +177,12 @@ if __name__ == '__main__':
 
     print (pixels.basis)
     print (pixels.colors)
+    pixels.ota()
     while True:
 
         try:
-            pixels.ota()
-            time.sleep(3)
+            #pixels.ota()
+            time.sleep(0.01)
         except KeyboardInterrupt:
             break
 
