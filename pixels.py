@@ -20,6 +20,7 @@ class Pixels:
     confirmed_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
     ota_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
     no_network_colors = [64, 64, 0, 0, 0, 0, 0, 0, 0]
+    recording_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
 
     def __init__(self):
         self.basis = [0] * 3 * self.PIXELS_N
@@ -64,6 +65,9 @@ class Pixels:
         self.next.set()
         self.queue.put(self._ota)
 
+    def recording(self):
+        self.next.set()
+        self.queue.put(self._recording)
 
     def _run(self):
         while True:
@@ -162,6 +166,10 @@ class Pixels:
             self.off()
 
         self.colors = self.ota_colors
+
+    def _recording(self):
+        self.write(self.recording_colors)
+        time.sleep(0.01)
 
     def write(self, colors):
         for i in range(self.PIXELS_N):
