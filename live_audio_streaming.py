@@ -299,6 +299,7 @@ is_confirmed = False
 is_recording = False
 start_recording = True
 stop_recording = False
+newloop = True
 pixels = Pixels()
 pixels.on()
 
@@ -310,6 +311,8 @@ def confirmation():
     print ('stopping confirmation wait {}: '.format(is_confirmed))
 
 def main(ARGS):
+
+    os.system("espeak --stdout 'Starting the Service' | aplay -Dsysdefault")
 
     pixels.on()
 
@@ -334,11 +337,13 @@ def main(ARGS):
     global is_recording
     global start_recording
     global stop_recording
+    global newloop
 
     is_confirmed = False
     is_recording = False
     start_recording = True
     stop_recording = False
+    newloop = True
 
     hotword = ""
     start = time.time()
@@ -352,6 +357,8 @@ def main(ARGS):
             if is_recording:
                 wav_data_to_save.extend(frame)
                 pixels.recording()
+                newloop = False
+            newloop = True
         else:
             if spinner: spinner.stop()
             #pixels.on()
@@ -361,27 +368,29 @@ def main(ARGS):
                 wav_data = bytearray()
             text = stream_context.finishStream()
             print ('Current recognition status {}: '.format(is_confirmed))
-
+            newloop = True
             for p in phrases:
                 for s in phrases[p]:
                     if s.upper() in text.upper():
-                        if start_recording and not is_recording and p.upper() == 'HI':
-                            logger.info("Starting Recording")
+                        if newloop and start_recording and not is_recording and p.upper() == 'HI':
+                            print ("Recognized, p={} s={} newloop={} text={} Starting Recording".format(p, s, newloop, text.upper()))
                             os.system("espeak --stdout 'Starting Recording' | aplay -Dsysdefault")
                             is_recording = True
                             start_recording = False
                             stop_recording = True
+                            newloop = False
                             pixels.recording()
                         elif stop_recording and is_recording and p.upper() == 'HI':
-                            logger.info("Stopping Recording")
-                            os.system("espeak --stdout 'Saving Recording' | aplay -Dsysdefault")
-                            logger.info("Writing Audio")
+                            print ("Recognized, p={} s={} newloop={} text={} Stopping Recording".format(p, s, newloop, text.upper()))
+                            # print ("Recognized, {} Stopping Recording".format(p))
+                            print("Writing Audio")
                             vad_audio.write_wav(os.path.join(RECORDINGS_PATH, datetime.now().strftime("rec_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data_to_save)
-                            time.sleep(2)
+                            os.system("espeak --stdout 'Recording Saved' | aplay -Dsysdefault")
                             wav_data_to_save = bytearray()
                             is_recording = False
                             start_recording = True
                             stop_recording = False
+                            newloop = False
                             pixels.on()
 
                         if not is_recording:
