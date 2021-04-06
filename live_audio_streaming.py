@@ -312,7 +312,7 @@ def confirmation():
 
 def main(ARGS):
 
-    os.system("espeak --stdout 'Starting the Service' | aplay -Dsysdefault")
+    # os.system("espeak --stdout 'Starting the Service' | aplay -Dsysdefault")
 
     pixels.on()
 
