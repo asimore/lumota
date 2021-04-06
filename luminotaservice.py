@@ -19,16 +19,21 @@ if __name__ == '__main__':
 
         os.system("espeak --stdout 'Updating, please wait.' | aplay -Dsysdefault")
 
-        os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumingit.sh')
-        model_name = check_version()
-        print (model_name)
-        if model_name.upper().strip() == 'NO_UPDATES':
-           print ('no updates found.')
-        else:
-           os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/luminota.sh ' + model_name)
-           os.system('/usr/sbin/service luminled stop')
-           os.system('cp ./LED_control.py /home/pi/projects/lumin/Lumin_FW_Src')
-           os.system('/usr/sbin/service luminled start')
+        cmd = os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumingit.sh')
+        exit_code = os.WEXITSTATUS(cmd)
+        if exit_code == 0:
+            model_name = check_version()
+            print (model_name)
+            if model_name.upper().strip() == 'NO_UPDATES':
+               print ('no updates found.')
+            else:
+               os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/luminota.sh ' + model_name)
+               os.system('/usr/sbin/service luminled stop')
+               os.system('cp ./LED_control.py /home/pi/projects/lumin/Lumin_FW_Src')
+               os.system('/usr/sbin/service luminled start')
 
-        os.system("espeak --stdout 'Update completed.' | aplay -Dsysdefault")
+            os.system("espeak --stdout 'Update completed.' | aplay -Dsysdefault")
+        else:
+            os.system("espeak --stdout 'No update, is available.' | aplay -Dsysdefault")
+
 exit(0)
