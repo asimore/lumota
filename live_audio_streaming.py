@@ -412,7 +412,7 @@ def main(ARGS):
                                     print ("Recognized, {}".format(p))
                                     now = datetime.now().isoformat()
                                     logger.info('Sending trigger...')
-                                    send_mqtt_trigger(now,hotword,is_confirmed)
+                                    send_mqtt_trigger(now,hotword,True)
                                     os.system("espeak --stdout 'Trigger sent' | aplay -Dsysdefault")
                                     is_confirmed = False
                                     pixels.on()
