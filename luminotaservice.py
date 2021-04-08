@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 sys.path.append('/home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumota')
 from pixels import Pixels
@@ -33,7 +34,7 @@ if __name__ == '__main__':
                 os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/luminota.sh ' + model_name)
                 os.system('cp ./LED_control.py /home/pi/projects/lumin/Lumin_FW_Src')
                 os.system('/usr/sbin/service luminled start')
-
+                time.sleep(2)
                 os.system("espeak --stdout 'Update is done, system is online.' | aplay -Dsysdefault")
 
 
