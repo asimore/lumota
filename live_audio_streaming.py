@@ -372,7 +372,7 @@ def main(ARGS):
             for p in phrases:
                 for s in phrases[p]:
                     if s.upper() in text.upper():
-                        if newloop and start_recording and not is_recording and p.upper() == 'HI':
+                        if not is_confirmed and newloop and start_recording and not is_recording and p.upper() == 'HI':
                             print ("Recognized, p={} s={} newloop={} text={} Starting Recording".format(p, s, newloop, text.upper()))
                             os.system("espeak --stdout 'Starting Recording' | aplay -Dsysdefault")
                             is_recording = True
@@ -380,7 +380,7 @@ def main(ARGS):
                             stop_recording = True
                             newloop = False
                             pixels.recording()
-                        elif stop_recording and is_recording and p.upper() == 'HI':
+                        elif not is_confirmed and stop_recording and is_recording and p.upper() == 'HI':
                             print ("Recognized, p={} s={} newloop={} text={} Stopping Recording".format(p, s, newloop, text.upper()))
                             # print ("Recognized, {} Stopping Recording".format(p))
                             print("Writing Audio")
