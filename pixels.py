@@ -16,7 +16,7 @@ class Pixels:
     PIXELS_N = 3
 
     wakeup_colors = [0, 64, 0, 0, 0, 0, 0, 0, 0]
-    detected_colors = [64, 64, 0, 0, 0, 0, 0, 0, 0]
+    detected_colors = [64, 48, 0, 0, 0, 0, 0, 0, 0]
     confirmed_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
     ota_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
     no_network_colors = [64, 64, 0, 0, 0, 0, 0, 0, 0]
@@ -137,9 +137,14 @@ class Pixels:
         print ([0] * 3 * self.PIXELS_N)
         self.write([0] * 3 * self.PIXELS_N)
 
-    def on(self):
+    def _on(self):
         self.write(self.wakeup_colors)
         time.sleep(0.01)
+
+    def on(self):
+        self.queue.queue.clear()
+        self.next.set()
+        self.queue.put(self._on)
 
         self.colors = self.wakeup_colors
 
@@ -169,7 +174,9 @@ class Pixels:
 
     def _recording(self):
         self.write(self.recording_colors)
-        time.sleep(0.01)
+        time.sleep(0.1)
+        self.write([0] * 3 * self.PIXELS_N)
+        time.sleep(0.1)
 
     def write(self, colors):
         for i in range(self.PIXELS_N):
