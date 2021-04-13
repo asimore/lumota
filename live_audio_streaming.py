@@ -63,7 +63,8 @@ phrases = {
     'fire': ['fire'],
     'yes': ['yes'],
     'no': ['no'],
-    'hi': ['hi']
+    'hi': ['hi'],
+    'stop': ['stop']
 }
 
 confirmation_message = "espeak --stdout 'Did you say {}' | aplay -Dsysdefault"
@@ -354,11 +355,11 @@ def main(ARGS):
             logging.debug("streaming frame")
             stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
             if ARGS.savewav: wav_data.extend(frame)
+            newloop = True
             if is_recording:
                 wav_data_to_save.extend(frame)
                 pixels.recording()
                 newloop = False
-            newloop = True
         else:
             if spinner: spinner.stop()
             #pixels.on()
@@ -374,13 +375,13 @@ def main(ARGS):
                     if s.upper() in text.upper():
                         if not is_confirmed and newloop and start_recording and not is_recording and p.upper() == 'HI':
                             print ("Recognized, p={} s={} newloop={} text={} Starting Recording".format(p, s, newloop, text.upper()))
-                            os.system("espeak --stdout 'Starting Recording' | aplay -Dsysdefault")
+                            os.system("espeak --stdout 'Recording Begin' | aplay -Dsysdefault")
                             is_recording = True
                             start_recording = False
                             stop_recording = True
                             newloop = False
                             pixels.recording()
-                        elif not is_confirmed and stop_recording and is_recording and p.upper() == 'HI':
+                        if not is_confirmed and stop_recording and is_recording and p.upper() == 'STOP':
                             print ("Recognized, p={} s={} newloop={} text={} Stopping Recording".format(p, s, newloop, text.upper()))
                             # print ("Recognized, {} Stopping Recording".format(p))
                             print("Writing Audio")
