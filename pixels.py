@@ -16,7 +16,7 @@ class Pixels:
     PIXELS_N = 3
 
     wakeup_colors = [0, 64, 0, 0, 0, 0, 0, 0, 0]
-    detected_colors = [64, 48, 0, 0, 0, 0, 0, 0, 0]
+    detected_colors = [64, 32, 0, 0, 0, 0, 0, 0, 0]
     confirmed_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
     ota_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
     no_network_colors = [64, 64, 0, 0, 0, 0, 0, 0, 0]
