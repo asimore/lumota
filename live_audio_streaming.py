@@ -385,15 +385,14 @@ def main(ARGS):
                             print ("Recognized, p={} s={} newloop={} text={} Stopping Recording".format(p, s, newloop, text.upper()))
                             # print ("Recognized, {} Stopping Recording".format(p))
                             print("Writing Audio")
-                            vad_audio.write_wav(os.path.join(RECORDINGS_PATH, datetime.now().strftime("rec_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data_to_save)
                             os.system("espeak --stdout 'Recording Saved' | aplay -Dsysdefault")
-                            wav_data_to_save = bytearray()
                             is_recording = False
                             start_recording = True
                             stop_recording = False
                             newloop = False
                             pixels.on()
-
+                            vad_audio.write_wav(os.path.join(RECORDINGS_PATH, datetime.now().strftime("rec_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data_to_save)
+                            wav_data_to_save = bytearray()
                         if not is_recording:
                             if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
                                 t=threading.Timer(5.5,confirmation)

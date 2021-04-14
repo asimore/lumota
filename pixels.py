@@ -173,14 +173,14 @@ class Pixels:
         self.colors = self.ota_colors
 
     def _recording(self):
-        self.write(self.recording_colors)
-        time.sleep(0.1)
+        self.write(self.recording_colors, 50)
+        time.sleep(0.5)
         self.write([0] * 3 * self.PIXELS_N)
-        time.sleep(0.1)
+        time.sleep(0.5)
 
-    def write(self, colors):
+    def write(self, colors, bright_percent=100):
         for i in range(self.PIXELS_N):
-            self.dev.set_pixel(i, int(colors[3*i]), int(colors[3*i + 1]), int(colors[3*i + 2]))
+            self.dev.set_pixel(i, int(colors[3*i]), int(colors[3*i + 1]), int(colors[3*i + 2]), bright_percent)
 
         self.dev.show()
 
