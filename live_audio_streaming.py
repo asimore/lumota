@@ -63,7 +63,7 @@ phrases = {
     'fire': ['fire'],
     'yes': ['yes'],
     'no': ['no'],
-    'hi': ['hi'],
+    # 'start': ['start'],
     'stop': ['stop']
 }
 
@@ -373,7 +373,7 @@ def main(ARGS):
             for p in phrases:
                 for s in phrases[p]:
                     if s.upper() in text.upper():
-                        if not is_confirmed and newloop and start_recording and not is_recording and p.upper() == 'HI':
+                        if not is_confirmed and newloop and start_recording and not is_recording and p.upper() == 'STOP':
                             print ("Recognized, p={} s={} newloop={} text={} Starting Recording".format(p, s, newloop, text.upper()))
                             os.system("espeak --stdout 'Recording Begin' | aplay -Dsysdefault")
                             is_recording = True
@@ -381,7 +381,7 @@ def main(ARGS):
                             stop_recording = True
                             newloop = False
                             pixels.recording()
-                        if not is_confirmed and stop_recording and is_recording and p.upper() == 'STOP':
+                        elif not is_confirmed and stop_recording and is_recording and p.upper() == 'STOP':
                             print ("Recognized, p={} s={} newloop={} text={} Stopping Recording".format(p, s, newloop, text.upper()))
                             # print ("Recognized, {} Stopping Recording".format(p))
                             print("Writing Audio")
@@ -394,7 +394,7 @@ def main(ARGS):
                             vad_audio.write_wav(os.path.join(RECORDINGS_PATH, datetime.now().strftime("rec_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data_to_save)
                             wav_data_to_save = bytearray()
                         if not is_recording:
-                            if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
+                            if not is_confirmed and (p.upper() == ' FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
                                 t=threading.Timer(5.5,confirmation)
                                 t.start()
                                 pixels.detected()
