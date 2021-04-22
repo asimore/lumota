@@ -62,9 +62,7 @@ phrases = {
     'intruder': ['intruder'],
     'fire': ['fire'],
     'yes': ['yes'],
-    'no': ['no'],
-    'hi': ['hi'],
-    'stop': ['stop']
+    'no': ['no']
 }
 
 confirmation_message = "espeak --stdout 'Did you say {}' | aplay -Dsysdefault"
@@ -297,10 +295,6 @@ def getModel(ARGS):
 
 
 is_confirmed = False
-is_recording = False
-start_recording = True
-stop_recording = False
-newloop = True
 pixels = Pixels()
 pixels.on()
 
@@ -333,18 +327,9 @@ def main(ARGS):
         spinner = Halo(spinner='line')
     stream_context = model.createStream()
     wav_data = bytearray()
-    wav_data_to_save = bytearray()
     global is_confirmed
-    global is_recording
-    global start_recording
-    global stop_recording
-    global newloop
 
     is_confirmed = False
-    is_recording = False
-    start_recording = True
-    stop_recording = False
-    newloop = True
 
     hotword = ""
     start = time.time()
@@ -355,11 +340,6 @@ def main(ARGS):
             logging.debug("streaming frame")
             stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
             if ARGS.savewav: wav_data.extend(frame)
-            newloop = True
-            if is_recording:
-                wav_data_to_save.extend(frame)
-                pixels.recording()
-                newloop = False
         else:
             if spinner: spinner.stop()
             #pixels.on()
@@ -369,69 +349,47 @@ def main(ARGS):
                 wav_data = bytearray()
             text = stream_context.finishStream()
             print ('Current recognition status {}: '.format(is_confirmed))
-            newloop = True
             for p in phrases:
-                for s in phrases[p]:
-                    if s.upper() in text.upper():
-                        if not is_confirmed and newloop and start_recording and not is_recording and p.upper() == 'HI':
-                            print ("Recognized, p={} s={} newloop={} text={} Starting Recording".format(p, s, newloop, text.upper()))
-                            os.system("espeak --stdout 'Recording Begin' | aplay -Dsysdefault")
-                            is_recording = True
-                            start_recording = False
-                            stop_recording = True
-                            newloop = False
-                            pixels.recording()
-                        elif not is_confirmed and stop_recording and is_recording and p.upper() == 'STOP':
-                            print ("Recognized, p={} s={} newloop={} text={} Stopping Recording".format(p, s, newloop, text.upper()))
-                            # print ("Recognized, {} Stopping Recording".format(p))
-                            print("Writing Audio")
-                            os.system("espeak --stdout 'Recording Saved' | aplay -Dsysdefault")
-                            is_recording = False
-                            start_recording = True
-                            stop_recording = False
-                            newloop = False
+                if p.upper() in text.upper():
+                    print("P: {}".format(p))
+                    print("TEXT: {}".format(text))
+                    if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
+                        t=threading.Timer(5.5,confirmation)
+                        t.start()
+                        pixels.detected()
+                        os.system(confirmation_message.format(p))
+                        is_confirmed = True
+                        hotword = p
+                        start = time.time()
+                    elif is_confirmed and (p.upper() == 'YES'):
+                        # send message
+                        is_confirmed = False
+                        t.join()
+                        pixels.confirmed()
+                        if(check_internet(REMOTE_SERVER) == True):
+                            print ("Recognized, {}".format(p))
+                            now = datetime.now().isoformat()
+                            logger.info('Sending trigger...')
+                            os.system("espeak --stdout 'Sending Trigger' | aplay -Dsysdefault")
+                            send_mqtt_trigger(now, hotword, True)
                             pixels.on()
-                            vad_audio.write_wav(os.path.join(RECORDINGS_PATH, datetime.now().strftime("rec_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data_to_save)
-                            wav_data_to_save = bytearray()
-                        if not is_recording:
-                            if not is_confirmed and (p.upper() == ' FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
-                                t=threading.Timer(5.5,confirmation)
-                                t.start()
-                                pixels.detected()
-                                os.system(confirmation_message.format(p))
-                                is_confirmed = True
-                                hotword = p
-                                start = time.time()
-                            elif is_confirmed and (p.upper() == 'YES'):
-                                # send message
-                                is_confirmed = False
-                                t.join()
-                                pixels.confirmed()
-     #                           time.sleep(1)
-                                if(check_internet(REMOTE_SERVER) == True):
-                                    print ("Recognized, {}".format(p))
-                                    now = datetime.now().isoformat()
-                                    logger.info('Sending trigger...')
-                                    send_mqtt_trigger(now,hotword,True)
-                                    os.system("espeak --stdout 'Trigger sent' | aplay -Dsysdefault")
-                                    is_confirmed = False
-                                    pixels.on()
-                                else:
-                                    os.system("espeak --stdout 'No internet connection' | aplay")
-                                    print("No internet connection, MQTT trigger not sent")
-                                    logger.error("No internet connection, MQTT trigger not sent")
-                                    pixels.ota()
-                            elif is_confirmed and (p.upper() == 'NO'):
-                               print ("Recognized, {}".format(p))
-                               is_confirmed = False
-                               t.join()
-                               pixels.confirmed()
-    #                           time.sleep(1)
-                               pixels.on()
-                            else:
-                               print ("Recognized, {}".format(p))
-                               #pixels.on()
+                        else:
+                            os.system("espeak --stdout 'No internet connection' | aplay")
+                            print("No internet connection, MQTT trigger not sent")
+                            logger.error("No internet connection, MQTT trigger not sent")
+                            pixels.ota()
 
+                        is_confirmed = False
+                    elif is_confirmed and (p.upper() == 'NO'):
+                       print ("Recognized, {}".format(p))
+                       is_confirmed = False
+                       t.join()
+                       pixels.confirmed()
+#                           time.sleep(1)
+                       pixels.on()
+                    else:
+                       print ("Recognized, {}".format(p))
+                       #pixels.on()
             stream_context = model.createStream()
 
 if __name__ == '__main__':

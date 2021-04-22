@@ -65,10 +65,6 @@ class Pixels:
         self.next.set()
         self.queue.put(self._ota)
 
-    def recording(self):
-        self.next.set()
-        self.queue.put(self._recording)
-
     def _run(self):
         while True:
             func = self.queue.get()
@@ -137,16 +133,9 @@ class Pixels:
         print ([0] * 3 * self.PIXELS_N)
         self.write([0] * 3 * self.PIXELS_N)
 
-    def _on(self):
+    def on(self):
         self.write(self.wakeup_colors)
         time.sleep(0.01)
-
-    def on(self):
-        self.queue.queue.clear()
-        self.next.set()
-        self.queue.put(self._on)
-
-        self.colors = self.wakeup_colors
 
     def detected(self):
         self.write(self.detected_colors)
@@ -171,12 +160,6 @@ class Pixels:
             self.off()
 
         self.colors = self.ota_colors
-
-    def _recording(self):
-        self.write(self.recording_colors, 50)
-        time.sleep(0.5)
-        self.write([0] * 3 * self.PIXELS_N)
-        time.sleep(0.5)
 
     def write(self, colors, bright_percent=100):
         for i in range(self.PIXELS_N):
