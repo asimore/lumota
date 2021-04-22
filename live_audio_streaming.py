@@ -63,7 +63,7 @@ phrases = {
     'fire': ['fire'],
     'yes': ['yes'],
     'no': ['no'],
-    # 'start': ['start'],
+    'hi': ['hi'],
     'stop': ['stop']
 }
 
@@ -373,7 +373,7 @@ def main(ARGS):
             for p in phrases:
                 for s in phrases[p]:
                     if s.upper() in text.upper():
-                        if not is_confirmed and newloop and start_recording and not is_recording and p.upper() == 'STOP':
+                        if not is_confirmed and newloop and start_recording and not is_recording and p.upper() == 'HI':
                             print ("Recognized, p={} s={} newloop={} text={} Starting Recording".format(p, s, newloop, text.upper()))
                             os.system("espeak --stdout 'Recording Begin' | aplay -Dsysdefault")
                             is_recording = True

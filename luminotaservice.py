@@ -28,14 +28,14 @@ if __name__ == '__main__':
             if model_name.upper().strip() == 'NO_UPDATES':
                print ('no updates found.')
             else:
-                os.system("espeak --stdout 'New updates are available, disabling the system to update.' | aplay -Dsysdefault")
+                # os.system("espeak --stdout 'New updates are available, disabling the system to update.' | aplay -Dsysdefault")
 
                 os.system('/usr/sbin/service luminled stop')
                 os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/luminota.sh ' + model_name)
                 os.system('cp ./LED_control.py /home/pi/projects/lumin/Lumin_FW_Src')
                 os.system('/usr/sbin/service luminled start')
                 time.sleep(2)
-                os.system("espeak --stdout 'Update is done, system is online.' | aplay -Dsysdefault")
+                # os.system("espeak --stdout 'Update is done, system is online.' | aplay -Dsysdefault")
 
 
 exit(0)
