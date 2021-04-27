@@ -295,6 +295,7 @@ def getModel(ARGS):
 
 
 is_confirmed = False
+is_any_light_on = False
 pixels = Pixels()
 pixels.on()
 
@@ -327,13 +328,19 @@ def main(ARGS):
         spinner = Halo(spinner='line')
     stream_context = model.createStream()
     wav_data = bytearray()
+
     global is_confirmed
+    global is_any_light_on
 
     is_confirmed = False
+    is_any_light_on = False
 
     hotword = ""
     start = time.time()
     for frame in frames:
+        if not is_any_light_on:
+            pixels.on()
+
         if frame is not None:
             if spinner: spinner.start()
             #pixels.on()
@@ -357,6 +364,7 @@ def main(ARGS):
                         t=threading.Timer(5.5,confirmation)
                         t.start()
                         pixels.detected()
+                        is_any_light_on = True
                         os.system(confirmation_message.format(p))
                         is_confirmed = True
                         hotword = p
@@ -366,6 +374,7 @@ def main(ARGS):
                         is_confirmed = False
                         t.join()
                         pixels.confirmed()
+                        is_any_light_on = True
                         if(check_internet(REMOTE_SERVER) == True):
                             print ("Recognized, {}".format(p))
                             now = datetime.now().isoformat()
@@ -373,11 +382,13 @@ def main(ARGS):
                             os.system("espeak --stdout 'Sending Trigger' | aplay -Dsysdefault")
                             send_mqtt_trigger(now, hotword, True)
                             pixels.on()
+                            is_any_light_on = False
                         else:
                             os.system("espeak --stdout 'No internet connection' | aplay")
                             print("No internet connection, MQTT trigger not sent")
                             logger.error("No internet connection, MQTT trigger not sent")
                             pixels.ota()
+                            is_any_light_on = True
 
                         is_confirmed = False
                     elif is_confirmed and (p.upper() == 'NO'):
@@ -385,8 +396,10 @@ def main(ARGS):
                        is_confirmed = False
                        t.join()
                        pixels.confirmed()
+                       is_any_light_on = True
 #                           time.sleep(1)
                        pixels.on()
+                       is_any_light_on = False
                     else:
                        print ("Recognized, {}".format(p))
                        #pixels.on()
