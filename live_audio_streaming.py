@@ -44,7 +44,7 @@ if arch.startswith('ARM'):
     f = open('/proc/cpuinfo','r')
     for line in f:
         if line[0:6]=='Serial':
-           cpuserial = line[10:26]
+            cpuserial = line[10:26]
 
 DEV_UUID = "LUMIN_"+cpuserial
 LOG = "ALL"
@@ -69,28 +69,28 @@ confirmation_message = "espeak --stdout 'Did you say {}' | aplay -Dsysdefault"
 
 #Function to check internet connectivity, returns true is internet is up.
 def check_internet(hostname):
-	try:
-		host = socket.gethostbyname(hostname)
-		s = socket.create_connection((host,80),2)
-		s.close()
-		return True
-	except:
-		pass
-	return False
+    try:
+        host = socket.gethostbyname(hostname)
+        s = socket.create_connection((host,80),2)
+        s.close()
+        return True
+    except:
+        pass
+    return False
 
 #MQTT client connection callback function
 def on_connect(client, userdata, flags, rc):
-	global flag_connected
-	flag_connected = 1
-	print("MQTT Connect")
-	logger.info("Connected to MQTT Broker")
+    global flag_connected
+    flag_connected = 1
+    print("MQTT Connect")
+    logger.info("Connected to MQTT Broker")
 
 #MQTT client disconnect callback function
 def on_disconnect(client, userdata, rc):
-	global flag_connected
-	flag_connected = 0
-	print("MQTT Disconnect")
-	logger.error("Disconnected from MQTT Broker")
+    global flag_connected
+    flag_connected = 0
+    print("MQTT Disconnect")
+    logger.error("Disconnected from MQTT Broker")
 
 #Last will message JSON
 last_will = {}
@@ -115,8 +115,8 @@ def send_mqtt_trigger(time_stamp,trigger_name,confirmation):
     print("Sending MQTT trigger !")
     global flag_connected
     if(flag_connected == 0):
-    	mqtt_client.connect(MQTT_BROKER,PORT,KEEP_ALIVE)
-    	mqtt_client.loop_start()
+        mqtt_client.connect(MQTT_BROKER,PORT,KEEP_ALIVE)
+        mqtt_client.loop_start()
     mqtt_client.publish("trigger",json_msg)
 
 
@@ -301,9 +301,12 @@ pixels.on()
 
 def confirmation():
     global is_confirmed
+    global is_any_light_on
 
     is_confirmed = False
+    is_any_light_on = False
     pixels.on()
+
     print ('stopping confirmation wait {}: '.format(is_confirmed))
 
 def main(ARGS):
@@ -340,46 +343,34 @@ def main(ARGS):
     for frame in frames:
         if not is_any_light_on:
             pixels.on()
-
         if frame is not None:
             if spinner: spinner.start()
-            #pixels.on()
-            logging.debug("streaming frame")
             stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
-            if ARGS.savewav: wav_data.extend(frame)
         else:
             if spinner: spinner.stop()
-            #pixels.on()
-            logging.debug("end utterence")
-            if ARGS.savewav:
-                vad_audio.write_wav(os.path.join(ARGS.savewav, datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data)
-                wav_data = bytearray()
             text = stream_context.finishStream()
-            print ('Current recognition status {}: '.format(is_confirmed))
             for p in phrases:
                 if p.upper() in text.upper():
-                    print("P: {}".format(p))
-                    print("TEXT: {}".format(text))
                     if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
-                        t=threading.Timer(5.5,confirmation)
-                        t.start()
                         pixels.detected()
                         is_any_light_on = True
                         os.system(confirmation_message.format(p))
+                        t = threading.Timer(5, confirmation)
+                        t.start()
                         is_confirmed = True
                         hotword = p
                         start = time.time()
-                    elif is_confirmed and (p.upper() == 'YES'):
+                    elif is_confirmed and (p.upper() == 'YES'): # and time.time() < (start + 5):
                         # send message
                         is_confirmed = False
-                        t.join()
+                        t.cancel()
                         pixels.confirmed()
                         is_any_light_on = True
-                        if(check_internet(REMOTE_SERVER) == True):
+                        if check_internet(REMOTE_SERVER):
+                            os.system("espeak --stdout 'Sending Trigger' | aplay -Dsysdefault")
                             print ("Recognized, {}".format(p))
                             now = datetime.now().isoformat()
                             logger.info('Sending trigger...')
-                            os.system("espeak --stdout 'Sending Trigger' | aplay -Dsysdefault")
                             send_mqtt_trigger(now, hotword, True)
                             pixels.on()
                             is_any_light_on = False
@@ -391,18 +382,16 @@ def main(ARGS):
                             is_any_light_on = True
 
                         is_confirmed = False
-                    elif is_confirmed and (p.upper() == 'NO'):
-                       print ("Recognized, {}".format(p))
-                       is_confirmed = False
-                       t.join()
-                       pixels.confirmed()
-                       is_any_light_on = True
-#                           time.sleep(1)
-                       pixels.on()
-                       is_any_light_on = False
+                    elif is_confirmed and (p.upper() == 'NO'): # and time.time() < (start + 5):
+                        print ("Recognized, {}".format(p))
+                        is_confirmed = False
+                        t.cancel()
+                        pixels.confirmed()
+                        is_any_light_on = True
+                        pixels.on()
+                        is_any_light_on = False
                     else:
-                       print ("Recognized, {}".format(p))
-                       #pixels.on()
+                        print ("Recognized, {}".format(p))
             stream_context = model.createStream()
 
 if __name__ == '__main__':

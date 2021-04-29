@@ -133,9 +133,12 @@ class Pixels:
         print ([0] * 3 * self.PIXELS_N)
         self.write([0] * 3 * self.PIXELS_N)
 
-    def on(self):
+    def _on(self):
         self.write(self.wakeup_colors)
         time.sleep(0.01)
+    def on(self):
+        self.next.set()
+        self.queue.put(self._on)
 
     def detected(self):
         self.write(self.detected_colors)
