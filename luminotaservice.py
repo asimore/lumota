@@ -37,6 +37,7 @@ if __name__ == '__main__':
                 time.sleep(2)
                 # os.system("espeak --stdout 'Update is done, system is online.' | aplay -Dsysdefault")
 
+        print("testing")
         os.system('cd /home/pi/projects/lumin/Lumin_FW_Src/audio_application/rec;git init;git remote add origin https://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@github.com/luminota/lumindata.git;git add --all;git commit -am "first commit";git pull origin master;git push -u origin master')
 
 
