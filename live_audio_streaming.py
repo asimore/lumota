@@ -369,7 +369,8 @@ def main(ARGS):
                         if check_internet(REMOTE_SERVER):
                             os.system("espeak --stdout 'Sending Trigger' | aplay -Dsysdefault")
                             print ("Recognized, {}".format(p))
-                            now = datetime.now().isoformat()
+                            # now = datetime.now().isoformat()
+                            now = datetime.now()
                             logger.info('Sending trigger...')
                             send_mqtt_trigger(now, hotword, True)
                             pixels.on()
@@ -390,7 +391,8 @@ def main(ARGS):
                         is_any_light_on = True
 
                         if check_internet(REMOTE_SERVER):
-                            now = datetime.now().isoformat()
+                            # now = datetime.now().isoformat()
+                            now = datetime.now()
                             print ("Recognized, {}".format(p))
                             logger.info('Sending trigger...')
                             send_mqtt_trigger(now, hotword, False)
