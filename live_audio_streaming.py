@@ -388,6 +388,21 @@ def main(ARGS):
                         t.cancel()
                         pixels.confirmed()
                         is_any_light_on = True
+
+                        if check_internet(REMOTE_SERVER):
+                            now = datetime.now().isoformat()
+                            print ("Recognized, {}".format(p))
+                            logger.info('Sending trigger...')
+                            send_mqtt_trigger(now, hotword, False)
+                            pixels.on()
+                            is_any_light_on = False
+                        else:
+                            os.system("espeak --stdout 'No internet connection' | aplay")
+                            print("No internet connection, MQTT trigger not sent")
+                            logger.error("No internet connection, MQTT trigger not sent")
+                            pixels.ota()
+                            is_any_light_on = True
+
                         pixels.on()
                         is_any_light_on = False
                     else:
