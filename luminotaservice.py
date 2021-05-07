@@ -28,14 +28,14 @@ if __name__ == '__main__':
             if model_name.upper().strip() == 'NO_UPDATES':
                print ('no updates found.')
             else:
-                # os.system("espeak --stdout 'New updates are available, disabling the system to update.' | aplay -Dsysdefault")
+                os.system("espeak --stdout 'New updates are available, disabling the system to update.' | aplay -Dsysdefault")
 
                 os.system('/usr/sbin/service luminled stop')
                 os.system('sh /home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/luminota.sh ' + model_name)
                 os.system('cp ./LED_control.py /home/pi/projects/lumin/Lumin_FW_Src')
                 os.system('/usr/sbin/service luminled start')
                 time.sleep(2)
-                # os.system("espeak --stdout 'Update is done, system is online.' | aplay -Dsysdefault")
+                os.system("espeak --stdout 'Update is done, system is online.' | aplay -Dsysdefault")
 
         # os.system('cd /home/pi/projects/lumin/Lumin_FW_Src/audio_application/rec;rm -rf .git;git init;git remote add origin https://luminota:lumin0$%^@github.com/luminota/lumindata.git;git add --all;git commit -am "first commit";git pull origin master --no-edit --allow-unrelated-histories;git commit -am "2nd commit";git push origin master')
 
