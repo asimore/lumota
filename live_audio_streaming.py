@@ -15,6 +15,9 @@ import paho.mqtt.client as mqtt
 import json
 import socket
 
+import RPi.GPIO as GPIO
+from threading import Thread
+
 sys.path.append('/home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/src')
 sys.path.append('/home/pi/projects/lumin/Lumin_FW_Src/audio_application/python/lumota')
 
@@ -79,6 +82,25 @@ def check_internet(hostname):
     except:
         pass
     return False
+
+
+def check_button_press():
+
+    BUTTON = 17
+
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(BUTTON, GPIO.IN)
+
+    while True:
+        pressed = not (GPIO.input(BUTTON))
+        if pressed:
+            global VOLUME
+            if VOLUME + 40 > 200:
+                VOLUME = 0
+            else:
+                VOLUME = VOLUME + 40
+        time.sleep(0.1)
+
 
 #MQTT client connection callback function
 def on_connect(client, userdata, flags, rc):
@@ -437,4 +459,7 @@ if __name__ == '__main__':
 
     ARGS = parser.parse_args()
     if ARGS.savewav: os.makedirs(ARGS.savewav, exist_ok=True)
+    thread = Thread(target=check_button_press)
+    thread.start()
+
     main(ARGS)
