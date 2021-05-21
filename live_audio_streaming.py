@@ -31,6 +31,8 @@ flag_connected = 0
 FIRMWARE_VERSION = "V_1.0"
 CONFIRMATION_WAIT = 20
 RECORDINGS_PATH = '/home/pi/projects/lumin/Lumin_FW_Src/audio_application/rec/'
+VOLUME = 40
+
 import os
 if not os.path.exists(RECORDINGS_PATH):
     os.makedirs(RECORDINGS_PATH)
@@ -65,7 +67,7 @@ phrases = {
     'no': ['no']
 }
 
-confirmation_message = "espeak --stdout 'Did you say {}' | aplay -Dsysdefault"
+confirmation_message = "espeak --stdout -a {0} 'Did you say {1}' | aplay -Dsysdefault"
 
 #Function to check internet connectivity, returns true is internet is up.
 def check_internet(hostname):
@@ -311,7 +313,7 @@ def confirmation():
 
 def main(ARGS):
 
-    # os.system("espeak --stdout 'Starting the Service' | aplay -Dsysdefault")
+    # os.system("espeak -a {0} --stdout 'Starting the Service' | aplay -Dsysdefault".format(VOLUME))
 
     pixels.on()
 
@@ -354,7 +356,7 @@ def main(ARGS):
                     if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
                         pixels.detected()
                         is_any_light_on = True
-                        os.system(confirmation_message.format(p))
+                        os.system(confirmation_message.format(VOLUME, p))
                         t = threading.Timer(5, confirmation)
                         t.start()
                         is_confirmed = True
@@ -367,7 +369,7 @@ def main(ARGS):
                         pixels.confirmed()
                         is_any_light_on = True
                         if check_internet(REMOTE_SERVER):
-                            os.system("espeak --stdout 'Sending Trigger' | aplay -Dsysdefault")
+                            os.system("espeak -a {0} --stdout 'Sending Trigger' | aplay -Dsysdefault".format(VOLUME))
                             print ("Recognized, {}".format(p))
                             now = datetime.now().isoformat()
                             logger.info('Sending trigger...')
@@ -375,7 +377,7 @@ def main(ARGS):
                             pixels.on()
                             is_any_light_on = False
                         else:
-                            os.system("espeak --stdout 'No internet connection' | aplay")
+                            os.system("espeak -a {0} --stdout 'No internet connection' | aplay".format(VOLUME))
                             print("No internet connection, MQTT trigger not sent")
                             logger.error("No internet connection, MQTT trigger not sent")
                             pixels.ota()
@@ -397,7 +399,7 @@ def main(ARGS):
                             pixels.on()
                             is_any_light_on = False
                         else:
-                            os.system("espeak --stdout 'No internet connection' | aplay")
+                            os.system("espeak -a {0} --stdout 'No internet connection' | aplay".format(VOLUME))
                             print("No internet connection, MQTT trigger not sent")
                             logger.error("No internet connection, MQTT trigger not sent")
                             pixels.ota()
