@@ -320,6 +320,11 @@ def getModel(ARGS):
 
 is_confirmed = False
 is_any_light_on = False
+is_fire = False
+is_help = False
+is_intruder = False
+start_time = time.time()
+
 pixels = Pixels()
 pixels.on()
 
@@ -358,12 +363,20 @@ def main(ARGS):
 
     global is_confirmed
     global is_any_light_on
+    global is_fire
+    global is_help
+    global is_intruder
+    global start_time
 
     is_confirmed = False
     is_any_light_on = False
+    is_fire = False
+    is_help = False
+    is_intruder = False
+    start_time = time.time()
 
     hotword = ""
-    start = time.time()
+
     for frame in frames:
         if not is_any_light_on:
             pixels.on()
@@ -375,15 +388,35 @@ def main(ARGS):
             text = stream_context.finishStream()
             for p in phrases:
                 if p.upper() in text.upper():
+                    if time.time() - start_time > 5:
+                        is_fire = False
+                        is_help = False
+                        is_intruder = False
                     if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
-                        pixels.detected()
-                        is_any_light_on = True
-                        os.system(confirmation_message.format(VOLUME, p))
-                        t = threading.Timer(5, confirmation)
-                        t.start()
-                        is_confirmed = True
-                        hotword = p
-                        start = time.time()
+                        checkword = True
+                        if is_fire or is_help or is_intruder:
+                            pixels.detected()
+                            is_any_light_on = True
+                            os.system(confirmation_message.format(VOLUME, p))
+                            t = threading.Timer(5, confirmation)
+                            t.start()
+                            is_confirmed = True
+                            hotword = p
+                            is_fire = False
+                            is_help = False
+                            is_intruder = False
+                            checkword = False
+
+                        if checkword:
+                            start_time = time.time()
+                            if not is_fire and p.upper() == 'FIRE':
+                                is_fire = True
+                            if not is_intruder and p.upper() == 'INTRUDER':
+                                is_intruder = True
+                            if not is_help and p.upper() == 'HELP':
+                                is_help = True
+                            print(" inside {0} {1} {2}".format(is_fire, is_help, is_intruder))
+
                     elif is_confirmed and (p.upper() == 'YES'): # and time.time() < (start + 5):
                         # send message
                         is_confirmed = False
