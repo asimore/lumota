@@ -387,7 +387,6 @@ def main(ARGS):
             if spinner: spinner.stop()
             text = (stream_context.finishStream()).upper()
             for p in phrases:
-                print(text)
                 if p.upper() in text:
                     if time.time() - start_time > 2:
                         is_fire = False
@@ -416,7 +415,6 @@ def main(ARGS):
                                 is_intruder = True
                             if not is_help and p.upper() == 'HELP':
                                 is_help = True
-                            print(" inside {0} {1} {2}".format(is_fire, is_help, is_intruder))
 
                     elif is_confirmed and (p.upper() == 'YES'): # and time.time() < (start + 5):
                         # send message
