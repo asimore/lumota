@@ -385,16 +385,17 @@ def main(ARGS):
             stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
         else:
             if spinner: spinner.stop()
-            text = stream_context.finishStream()
+            text = (stream_context.finishStream()).upper()
             for p in phrases:
-                if p.upper() in text.upper():
-                    if time.time() - start_time > 5:
+                print(text)
+                if p.upper() in text:
+                    if time.time() - start_time > 2:
                         is_fire = False
                         is_help = False
                         is_intruder = False
                     if not is_confirmed and (p.upper() == 'FIRE' or p.upper() == 'INTRUDER' or p.upper() == 'HELP'):
                         checkword = True
-                        if is_fire or is_help or is_intruder:
+                        if text.count(p.upper()) > 1 or is_fire or is_help or is_intruder:
                             pixels.detected()
                             is_any_light_on = True
                             os.system(confirmation_message.format(VOLUME, p))
