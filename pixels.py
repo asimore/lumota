@@ -14,6 +14,7 @@ except ImportError:
 
 class Pixels:
     PIXELS_N = 3
+    BRIGHTNESS = 20
 
     wakeup_colors = [0, 64, 0, 0, 0, 0, 0, 0, 0]
     detected_colors = [64, 32, 0, 0, 0, 0, 0, 0, 0]
@@ -164,9 +165,9 @@ class Pixels:
 
         self.colors = self.ota_colors
 
-    def write(self, colors, bright_percent=100):
+    def write(self, colors):
         for i in range(self.PIXELS_N):
-            self.dev.set_pixel(i, int(colors[3*i]), int(colors[3*i + 1]), int(colors[3*i + 2]), bright_percent)
+            self.dev.set_pixel(i, int(colors[3*i]), int(colors[3*i + 1]), int(colors[3*i + 2]), self.BRIGHTNESS)
 
         self.dev.show()
 

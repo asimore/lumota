@@ -97,8 +97,10 @@ def check_button_press():
             global VOLUME
             if VOLUME + 40 > 200:
                 VOLUME = 0
+                pixels.BRIGHTNESS = 0
             else:
                 VOLUME = VOLUME + 40
+                pixels.BRIGHTNESS = pixels.BRIGHTNESS + 20
         time.sleep(0.1)
 
 
