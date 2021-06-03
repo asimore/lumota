@@ -97,10 +97,12 @@ def check_button_press():
             global VOLUME
             if VOLUME + 40 > 200:
                 VOLUME = 0
-                pixels.BRIGHTNESS = 0
+                pixels.BRIGHTNESS = 5
+                pixels.refresh_colors()
             else:
                 VOLUME = VOLUME + 40
-                pixels.BRIGHTNESS = pixels.BRIGHTNESS + 20
+                pixels.BRIGHTNESS = pixels.BRIGHTNESS + 19
+                pixels.refresh_colors()
         time.sleep(0.1)
 
 

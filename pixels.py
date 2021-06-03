@@ -22,6 +22,7 @@ class Pixels:
     ota_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
     no_network_colors = [64, 64, 0, 0, 0, 0, 0, 0, 0]
     recording_colors = [64, 0, 0, 0, 0, 0, 0, 0, 0]
+    current_colors = wakeup_colors
 
     def __init__(self):
         self.basis = [0] * 3 * self.PIXELS_N
@@ -131,7 +132,6 @@ class Pixels:
         # self._off()
 
     def _off(self):
-        print ([0] * 3 * self.PIXELS_N)
         self.write([0] * 3 * self.PIXELS_N)
 
     def _on(self):
@@ -165,7 +165,11 @@ class Pixels:
 
         self.colors = self.ota_colors
 
+    def refresh_colors(self):
+        self.write(self.current_colors)
+
     def write(self, colors):
+        self.current_colors = colors
         for i in range(self.PIXELS_N):
             self.dev.set_pixel(i, int(colors[3*i]), int(colors[3*i + 1]), int(colors[3*i + 2]), self.BRIGHTNESS)
 
